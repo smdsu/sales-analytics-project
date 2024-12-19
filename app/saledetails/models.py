@@ -1,9 +1,7 @@
 from sqlalchemy import ForeignKey, text 
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 
-from app.database import Base, str_uniq, str_null_true, int_pk
-
-from datetime import date
+from app.database import Base, int_pk
 
 class SaleDetails(Base):
     sale_id: Mapped[int_pk] = mapped_column(ForeignKey("sales.sale_id"), nullable=False)
