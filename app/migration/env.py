@@ -13,7 +13,10 @@ from os.path import dirname, abspath
 sys.path.insert(0, dirname(abspath(__file__)))
 
 from app.database import DB_URL, Base
-from app.models.sales import Sale, SaleDetails, Product, Customer
+from app.sales.models import Sale
+from app.saledetails.models import SaleDetails
+from app.products.models import Product
+from app.customers.models import Customer
 
 
 # this is the Alembic Config object, which provides
