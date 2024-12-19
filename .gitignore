@@ -4,3 +4,7 @@
 /app/migration/__pycache__
 /app/models/__pycache__
 /app/migration/versions/__pycache__
+/app/customers/__pycache__
+/app/products/__pycache__
+/app/saledetails/__pycache__
+/app/sales/__pycache__
