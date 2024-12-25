@@ -19,15 +19,20 @@ fake = Faker()
 
 def generate_random_customer(num_records=1):
     customers = []
+    emails = []
     for _ in range(num_records):
-        customer = {
-            'first_name': fake.first_name(),
-            'last_name': fake.last_name(),
-            'date_of_birth': fake.date_of_birth(minimum_age=18, maximum_age=90),
-            'email': fake.email(),
-            'phone_number': fake.phone_number(),
-        }
-        customers.append(customer)
+        email_new = fake.email()
+        if email_new not in emails:
+            emails.append(email_new)
+            customer = {
+                'first_name': fake.first_name(),
+                'last_name': fake.last_name(),
+                'date_of_birth': fake.date_of_birth(minimum_age=18, maximum_age=90),
+                'email': email_new,
+                'phone_number': fake.phone_number(),
+                'gender': random.choice(['Male', 'Female']),
+            }
+            customers.append(customer)
     return customers
 
 def generate_random_product(num_records=1):
@@ -60,7 +65,6 @@ def generate_random_sales_and_details(num_records, customer_ids, product_ids):
             'city': fake.city(),
             'customer_type': random.choice(['Member', 'Normal']),
             'customer_id': customer_id,
-            'gender': random.choice(['Male', 'Female']),
             'sale_date': sale_date,
         })
 
@@ -118,16 +122,16 @@ async def get_products():
 
 
 async def main():
-    #customers = generate_random_customer(100)
-    #await insert_customers(customers)
+    customers = generate_random_customer(1000)
+    await insert_customers(customers)
 
-    #products = generate_random_product(100)
-    #await insert_products(products)
+    products = generate_random_product(1000)
+    await insert_products(products)
 
     customers = await get_customers()
     products = await get_products()
 
-    sales, sale_details = generate_random_sales_and_details(100, customers, products)  # Генерируем продажи и детали
+    sales, sale_details = generate_random_sales_and_details(1000, customers, products)  # Генерируем продажи и детали
     await insert_sales(sales)
     await insert_sale_details(sale_details)
 
