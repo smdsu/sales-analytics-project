@@ -1,5 +1,4 @@
-from sqlalchemy.orm import Mapped
-
+from sqlalchemy.orm import Mapped, relationship
 from app.database import Base, str_uniq, int_pk
 
 from datetime import date
@@ -12,6 +11,8 @@ class Customer(Base):
     email: Mapped[str_uniq]
     phone_number: Mapped[str_uniq]
     gender: Mapped[str]
+
+    sales: Mapped[list["Sale"]] = relationship("Sale", back_populates="customer")
 
     def __str__(self):
         return (f"{self.__class__.__name__}(id={self.id}, "
