@@ -14,10 +14,5 @@ class Customer(Base):
 
     sales: Mapped[list["Sale"]] = relationship("Sale", back_populates="customer")
 
-    def __str__(self):
-        return (f"{self.__class__.__name__}(id={self.id}, "
-                f"first_name={self.first_name!r},"
-                f"last_name={self.last_name!r})")
-
     def __repr__(self):
-        return str(self)
+        return f"{self.__class__.__name__}(id={self.id})"

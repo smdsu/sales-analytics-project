@@ -12,11 +12,8 @@ class SaleDetails(Base):
     sale: Mapped["Sale"] = relationship("Sale", back_populates="saledetails")
     product: Mapped["Product"] = relationship("Product", back_populates="saledetails")
 
-    def __str__(self):
-        return (f"{self.__class__.__name__}(id={self.sale_id}, "
-                f"product_id={self.product_id})")
     def __repr__(self):
-        return str(self)
+        return f"{self.__class__.__name__}(id={self.sale_id}:{self.product_id})"
     
     def to_dict(self) -> dict:
         date =  {

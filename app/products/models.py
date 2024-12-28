@@ -11,8 +11,5 @@ class Product(Base):
 
     saledetails: Mapped[list["SaleDetails"]] = relationship("SaleDetails", back_populates="product")
 
-    def __str__(self):
-        return (f"{self.__class__.__name__}(id={self.id}, "
-                f"product_name={self.product_name!r})")
     def __repr__(self):
-        return str(self)
+        return f"{self.__class__.__name__}(id={self.id})"
