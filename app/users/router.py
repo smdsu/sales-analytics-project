@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, status, Response, Depends
 
 from app.users.auth import get_password_hash, authenticate_user, create_access_token, get_current_user
 from app.users.dao import UsersDAO
-from app.users.schemas import SUserRegister, SUserAuth, SUserData
+from app.users.schemas import SUserRegister, SUserAuth, SUserData, SUserUpd
 from app.users.models import User
 from app.users.dependencies import is_current_user_admin, is_current_user_superadmin
 
@@ -54,3 +54,42 @@ async def set_me_founder(user_data: User = Depends(get_current_user)):
     else:
         return {"message": "Ошибка при обновлении покупателя!"}
 '''
+
+@router.get("/{id}", response_model=SUserData, summary="Получить данные пользователя по ID")
+async def get_user_by_id(id: int, user_data: User = Depends(is_current_user_admin)) -> SUserData | None:
+    rez = await UsersDAO.find_one_or_none_by_id(id)
+    if not rez:
+        raise HTTPException(status_code=404, detail=f'Пользователь с id={id} не найден')
+    return rez
+
+@router.post("/add/")
+async def add_user(user: SUserRegister, user_data: User = Depends(is_current_user_superadmin)) -> dict:
+    check = await UsersDAO.add(**user.dict())
+    if check:
+        return {"message": "Пользователь успешно добавлен!", "user": user}
+    else:
+        return {"message": "Ошибка при добавлении пользователя!"}
+        
+@router.put("/update_by_id/{id}")
+async def upd_user_by_id(id: int, new_user: SUserUpd = Depends(), user_data: User = Depends(is_current_user_superadmin)) -> dict:
+    check = await UsersDAO.update(filter_by={"id": id}, **new_user.to_new_data_dict())
+    if check:
+        return {"message": f"Пользователь {id} успешно обновлен!", "rows": new_user.to_new_data_dict()}
+    else:
+        return {"message": "Ошибка при обновлении пользователя!"}
+    
+@router.put("/update_by_filter/")
+async def upd_user_by_filter(new_user: SUserUpd = Depends(), user_data: User = Depends(is_current_user_superadmin)) -> dict:
+    check = await UsersDAO.update(filter_by=new_user.to_filter_dict(), **new_user.to_new_data_dict())
+    if check:
+        return {"message": f"Пользователи успешно обновлены!", "rows_updated": check, "data": new_user.to_new_data_dict()}
+    else:
+        return {"message": "Ошибка при обновлении пользователя!"}
+
+@router.delete("/delete/{id}")
+async def delete_user_by_id(id: int, user_data: User = Depends(is_current_user_superadmin)) -> dict:
+    check = UsersDAO.delete(id = id)
+    if check:
+        return {"message": f"Пользователь с {id} удалён!"}
+    else:
+        return {"message": "Произошла ошибка при удалении пользователя!"}
