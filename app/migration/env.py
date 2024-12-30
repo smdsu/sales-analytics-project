@@ -17,6 +17,7 @@ from app.sales.models import Sale
 from app.saledetails.models import SaleDetails
 from app.products.models import Product
 from app.customers.models import Customer
+from app.users.models import User
 
 
 # this is the Alembic Config object, which provides
