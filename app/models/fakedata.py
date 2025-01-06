@@ -1,13 +1,11 @@
 from os.path import abspath, dirname, join
 import sys
 
-sys.path.append(abspath(join(dirname(__file__), "../../")))
-
 from app.database import async_session_maker
 from app.customers.models import Customer
-from app.products.models import Product 
+from app.products.models import Product
 from app.sales.models import Sale
-from app.saledetails.models import SaleDetails 
+from app.saledetails.models import SaleDetails
 
 from faker import Faker
 import random
@@ -15,7 +13,10 @@ import asyncio
 
 from sqlalchemy import text
 
+sys.path.append(abspath(join(dirname(__file__), "../../")))
+
 fake = Faker()
+
 
 def generate_random_customer(num_records=1):
     customers = []
@@ -35,6 +36,7 @@ def generate_random_customer(num_records=1):
             customers.append(customer)
     return customers
 
+
 def generate_random_product(num_records=1):
     categories = ['Electronics', 'Clothing', 'Books', 'Toys', 'Groceries']
     products = []
@@ -48,13 +50,14 @@ def generate_random_product(num_records=1):
         products.append(product)
     return products
 
+
 def generate_random_sales_and_details(num_records, customer_ids, product_ids):
     sales = []
     sale_details = []
-    sale_id_counter = 1 
+    sale_id_counter = 1
 
     for _ in range(num_records):
-        sale_id = sale_id_counter 
+        sale_id = sale_id_counter
         sale_id_counter += 1
         customer_id = random.choice(customer_ids)
         sale_date = fake.date_this_year()
@@ -82,12 +85,14 @@ def generate_random_sales_and_details(num_records, customer_ids, product_ids):
 
     return sales, sale_details
 
+
 async def insert_customers(customers):
     async with async_session_maker() as session:
         for customer in customers:
             new_customer = Customer(**customer)
             session.add(new_customer)
         await session.commit()
+
 
 async def insert_products(products):
     async with async_session_maker() as session:
@@ -96,12 +101,14 @@ async def insert_products(products):
             session.add(new_product)
         await session.commit()
 
+
 async def insert_sales(sales):
     async with async_session_maker() as session:
         for sale in sales:
             new_sale = Sale(**sale)
             session.add(new_sale)
         await session.commit()
+
 
 async def insert_sale_details(sale_details):
     async with async_session_maker() as session:
@@ -110,10 +117,12 @@ async def insert_sale_details(sale_details):
             session.add(new_detail)
         await session.commit()
 
+
 async def get_customers():
     async with async_session_maker() as session:
         result = await session.execute(text("SELECT customer_id FROM customers"))
         return [row[0] for row in result.fetchall()]
+
 
 async def get_products():
     async with async_session_maker() as session:
@@ -131,7 +140,11 @@ async def main():
     customers = await get_customers()
     products = await get_products()
 
-    sales, sale_details = generate_random_sales_and_details(1000, customers, products)  # Генерируем продажи и детали
+    sales, sale_details = generate_random_sales_and_details(
+        1000,
+        customers,
+        products
+    )
     await insert_sales(sales)
     await insert_sale_details(sale_details)
 

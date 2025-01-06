@@ -2,6 +2,7 @@ from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field
 from typing import Optional
 
+
 class SProduct(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: int
@@ -12,12 +13,14 @@ class SProduct(BaseModel):
     created_at: datetime = Field(..., description="Время создания записи в таблице")
     updated_at: datetime = Field(..., description="Время обноввления записи в таблице")
 
+
 class SProductAdd(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     product_name: str = Field(..., description="Название продукта")
     product_description: str = Field(..., description="Описание продукта")
     product_category: str = Field(..., description="Категория продукта")
     unit_price: float = Field(..., description="Цена продукта")
+
 
 class SProductUpd(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -27,10 +30,10 @@ class SProductUpd(BaseModel):
     product_category: Optional[str] = Field(None, description="Категория продукта")
     unit_price: Optional[float] = Field(None, description="Цена продукта")
 
-    product_name_new: Optional[str] = Field(None, description="Название продукта")
-    product_description_new: Optional[str] = Field(None, description="Описание продукта")
-    product_category_new: Optional[str] = Field(None, description="Категория продукта")
-    unit_price_new: Optional[float] = Field(None, description="Цена продукта")
+    product_name_new: Optional[str] = Field(None, description="New Название")
+    product_description_new: Optional[str] = Field(None, description="New Описание")
+    product_category_new: Optional[str] = Field(None, description="New Категория")
+    unit_price_new: Optional[float] = Field(None, description="New Цена")
 
     def to_filter_dict(self) -> dict:
         data = {
@@ -42,7 +45,7 @@ class SProductUpd(BaseModel):
         }
         filtered_data = {key: value for key, value in data.items() if value is not None}
         return filtered_data
-    
+
     def to_new_data_dict(self) -> dict:
         data = {
             'product_name': self.product_name_new,

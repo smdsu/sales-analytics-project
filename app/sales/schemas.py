@@ -2,6 +2,7 @@ from datetime import datetime, date
 from pydantic import BaseModel, ConfigDict, Field
 from typing import Optional
 
+
 class SSale(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: int
@@ -13,6 +14,7 @@ class SSale(BaseModel):
     created_at: datetime = Field(..., description="Время создания записи в таблице")
     updated_at: datetime = Field(..., description="Время обноввления записи в таблице")
 
+
 class SSaleAdd(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     branch: str = Field(..., description="Название филиала")
@@ -20,6 +22,7 @@ class SSaleAdd(BaseModel):
     customer_type: str = Field(..., description="Тип клиента")
     customer_id: float = Field(..., description="ID клиента")
     sale_date: date = Field(..., description="Дата продажи")
+
 
 class SSaleUpd(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -47,7 +50,7 @@ class SSaleUpd(BaseModel):
         }
         filtered_data = {key: value for key, value in data.items() if value is not None}
         return filtered_data
-    
+
     def to_new_data_dict(self):
         data = {
             'branch': self.branch_new,

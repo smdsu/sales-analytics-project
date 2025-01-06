@@ -3,6 +3,7 @@ from app.database import Base, str_uniq, int_pk
 
 from datetime import date
 
+
 class Customer(Base):
     id: Mapped[int_pk]
     first_name: Mapped[str]

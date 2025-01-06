@@ -2,6 +2,7 @@ from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field
 from typing import Optional
 
+
 class SSaleDetail(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     sale_id: int = Field(..., description="ID продажи")
@@ -9,6 +10,7 @@ class SSaleDetail(BaseModel):
     quantity: int = Field(..., description="Количество продукта")
     created_at: datetime = Field(..., description="Время создания записи в таблице")
     updated_at: datetime = Field(..., description="Время обноввления записи в таблице")
+
 
 class SSaleDetailFull(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -20,11 +22,13 @@ class SSaleDetailFull(BaseModel):
     created_at: datetime = Field(..., description="Время создания записи в таблице")
     updated_at: datetime = Field(..., description="Время обноввления записи в таблице")
 
+
 class SSaleDetailAdd(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     sale_id: int = Field(..., description="ID продажи")
     product_id: int = Field(..., description="ID продукта")
     quantity: int = Field(..., description="Количество продукта")
+
 
 class SSaleDetailUpd(BaseModel):
     model_config = ConfigDict(from_attributes=True)

@@ -1,5 +1,6 @@
 from datetime import date
 
+
 class RBCustomer:
     def __init__(
             self,
@@ -18,9 +19,9 @@ class RBCustomer:
         self.email = email
         self.phone_number = phone_number
         self.gender = gender
-    
+
     def to_dict(self) -> dict:
-        date =  {
+        date = {
             'id': self.id,
             'first_name': self.first_name,
             'last_name': self.last_name,
@@ -29,5 +30,9 @@ class RBCustomer:
             'phone_number': self.phone_number,
             'gender': self.gender,
         }
-        filttered_date = {key: value for key, value in date.items() if value is not None}
+        filttered_date = {
+            key: value
+            for key, value in date.items()
+            if value is not None
+        }
         return filttered_date

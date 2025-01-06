@@ -5,18 +5,21 @@ import random
 
 fake = Faker()
 
+
 @pytest.mark.asyncio
 async def test_get_all_products_no_auth():
     async with AsyncClient(base_url="http://127.0.0.1:8000") as async_client:
         response = await async_client.get("/products/")
     assert response.status_code == 307
 
+
 @pytest.mark.asyncio
 async def test_get_product_by_id_no_auth():
     test_product_id = 1
     async with AsyncClient(base_url="http://127.0.0.1:8000") as async_client:
         response = await async_client.get(f"/products/{test_product_id}")
-    assert response.status_code == 307 
+    assert response.status_code == 307
+
 
 @pytest.mark.asyncio
 async def test_add_product_no_auth():
@@ -29,7 +32,8 @@ async def test_add_product_no_auth():
     }
     async with AsyncClient(base_url="http://127.0.0.1:8000") as async_client:
         response = await async_client.post("/products/add/", json=new_product)
-    assert response.status_code == 307    
+    assert response.status_code == 307
+
 
 @pytest.mark.asyncio
 async def test_upd_product_by_id_no_auth():
@@ -41,8 +45,12 @@ async def test_upd_product_by_id_no_auth():
     }
     product_id = 1
     async with AsyncClient(base_url="http://127.0.0.1:8000") as async_client:
-        response = await async_client.put(f"/products/update_by_id/{product_id}", json=updated_product)
-    assert response.status_code == 307   
+        response = await async_client.put(
+            f"/products/update_by_id/{product_id}",
+            json=updated_product
+        )
+    assert response.status_code == 307
+
 
 @pytest.mark.asyncio
 async def test_upd_product_by_filter_no_auth():
@@ -50,26 +58,32 @@ async def test_upd_product_by_filter_no_auth():
         "unit_price": 666.0,
         "unit_price_new": 308.08,
     }
-    async with AsyncClient(base_url="http://127.0.0.1:8000") as async_client:   
-        response = await async_client.put("/products/update_by_filter/", json=updated_product)
-    assert response.status_code == 307    
+    async with AsyncClient(base_url="http://127.0.0.1:8000") as async_client:
+        response = await async_client.put(
+            "/products/update_by_filter/",
+            json=updated_product
+        )
+    assert response.status_code == 307
+
 
 @pytest.mark.asyncio
 async def test_delete_product_by_id_no_auth():
     product_id = 1
     async with AsyncClient(base_url="http://127.0.0.1:8000") as async_client:
         response = await async_client.delete(f"/products/delete/{product_id}")
-    assert response.status_code == 307    
+    assert response.status_code == 307
+
 
 @pytest.mark.asyncio
 async def test_get_all_products(fake_super_token):
     async with AsyncClient(
         base_url="http://127.0.0.1:8000",
         cookies={"users_access_token": fake_super_token}
-        ) as async_client:
+    ) as async_client:
         response = await async_client.get("/products/")
     assert response.status_code == 200
     assert isinstance(response.json(), list)
+
 
 @pytest.mark.asyncio
 async def test_get_product_by_id(fake_super_token):
@@ -77,10 +91,11 @@ async def test_get_product_by_id(fake_super_token):
     async with AsyncClient(
         base_url="http://127.0.0.1:8000",
         cookies={"users_access_token": fake_super_token}
-        ) as async_client:
+    ) as async_client:
         response = await async_client.get(f"/products/{test_product_id}")
     assert response.status_code == 200
     assert response.json()["id"] == test_product_id
+
 
 @pytest.mark.asyncio
 async def test_add_product(fake_super_token):
@@ -94,10 +109,11 @@ async def test_add_product(fake_super_token):
     async with AsyncClient(
         base_url="http://127.0.0.1:8000",
         cookies={"users_access_token": fake_super_token}
-        ) as async_client:
+    ) as async_client:
         response = await async_client.post("/products/add/", json=new_product)
     assert response.status_code == 200
     assert response.json()["message"] == "Продукт успешно добавлен!"
+
 
 @pytest.mark.asyncio
 async def test_upd_product_by_id(fake_super_token):
@@ -111,10 +127,14 @@ async def test_upd_product_by_id(fake_super_token):
     async with AsyncClient(
         base_url="http://127.0.0.1:8000",
         cookies={"users_access_token": fake_super_token}
-        ) as async_client:
-        response = await async_client.put(f"/products/update_by_id/{product_id}", json=updated_product)
+    ) as async_client:
+        response = await async_client.put(
+            f"/products/update_by_id/{product_id}",
+            json=updated_product
+        )
     assert response.status_code == 200
     assert response.json()["message"] == f"Продукт {product_id} успешно обновлён!"
+
 
 @pytest.mark.asyncio
 async def test_upd_product_by_filter(fake_super_token):
@@ -125,8 +145,11 @@ async def test_upd_product_by_filter(fake_super_token):
     async with AsyncClient(
         base_url="http://127.0.0.1:8000",
         cookies={"users_access_token": fake_super_token}
-        ) as async_client:
-        response = await async_client.put("/products/update_by_filter/", json=updated_product)
+    ) as async_client:
+        response = await async_client.put(
+            "/products/update_by_filter/",
+            json=updated_product
+        )
     assert response.status_code == 200
     assert response.json()["message"] == "Продукты успешно обновлены!"
 
@@ -137,7 +160,7 @@ async def test_delete_product_by_id(fake_super_token):
     async with AsyncClient(
         base_url="http://127.0.0.1:8000",
         cookies={"users_access_token": fake_super_token}
-        ) as async_client:
+    ) as async_client:
         response = await async_client.delete(f"/products/delete/{product_id}")
     assert response.status_code == 200
     assert response.json()["message"] == f"Продукт с {product_id} удалён!"
