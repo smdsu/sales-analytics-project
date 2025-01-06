@@ -45,7 +45,7 @@ class SSaleUpd(BaseModel):
             'customer_id': self.customer_id,
             'sale_date': self.sale_date
         }
-        fultered_data = {key: value for key, value in data.items() if value is not None}
+        filtered_data = {key: value for key, value in data.items() if value is not None}
         return filtered_data
     
     def to_new_data_dict(self):

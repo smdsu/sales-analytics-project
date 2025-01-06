@@ -39,11 +39,11 @@ class SUserUpd(BaseModel):
     email: Optional[EmailStr] = Field(None, description="Электронная почта")
     # password: str = Field(..., description="Хэш пароля")
 
-    is_user: Optional[bool]
-    is_vendor: Optional[bool]
-    is_analyst: Optional[bool]
-    is_admin: Optional[bool]
-    is_super_admin: Optional[bool]
+    is_user: Optional[bool] = Field(None)
+    is_vendor: Optional[bool] = Field(None)
+    is_analyst: Optional[bool] = Field(None)
+    is_admin: Optional[bool] = Field(None)
+    is_super_admin: Optional[bool] = Field(None)
 
 
     id_new: Optional[int] = Field(None, description="ID пользователя")
@@ -53,11 +53,11 @@ class SUserUpd(BaseModel):
     email_new: Optional[EmailStr] = Field(None, description="Электронная почта")
     password_new: Optional[str] = Field(None, description="Пароль")
     
-    is_user_new: Optional[bool]
-    is_vendor_new: Optional[bool]
-    is_analyst_new: Optional[bool]
-    is_admin_new: Optional[bool]
-    is_super_admin_new: Optional[bool]
+    is_user_new: Optional[bool] = Field(None)
+    is_vendor_new: Optional[bool] = Field(None)
+    is_analyst_new: Optional[bool] = Field(None)
+    is_admin_new: Optional[bool] = Field(None)
+    is_super_admin_new: Optional[bool] = Field(None)
 
     
     def to_filter_dict(self) -> dict:
@@ -77,7 +77,9 @@ class SUserUpd(BaseModel):
         return filttered_date
     
     def to_new_data_dict(self) -> dict:
-        password = get_password_hash(self.password_new)
+        password = None
+        if self.password_new is not None:
+            password = get_password_hash(self.password_new)
         date =  {
             'id': self.id_new,
             'first_name': self.first_name_new,

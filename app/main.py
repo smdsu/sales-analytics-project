@@ -8,7 +8,7 @@ from app.customers.router import router as router_customers
 from app.products.router import router as router_products
 from app.saledetails.router import router as router_saledetails
 from app.sales.router import router as router_sales
-from app.users.router import router as router_users
+from app.users.router import router_users, router_auth
 
 app = FastAPI()
 
@@ -22,6 +22,7 @@ app.include_router(router_products)
 app.include_router(router_sales)
 app.include_router(router_saledetails)
 app.include_router(router_users)
+app.include_router(router_auth)
 
 @app.exception_handler(TokenExpiredException)
 async def token_expired_exception_handler(request: Request, exc: TokenExpiredException):

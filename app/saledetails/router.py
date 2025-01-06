@@ -39,6 +39,6 @@ async def update_saledetail(saledetail: SSaleDetailUpd, user_data: User = Depend
 async def delete_saledetail_by_id(id: int, user_data: User = Depends(is_current_user_admin)) -> dict:
     check = SaleDetailsDAO.delete(id = id)
     if check:
-        return {"message": f"Детали продажи с {id} удалён!"}
+        return {"message": f"Детали продажи с {id} удалены!"}
     else:
         return {"message": "Произошла ошибка при удалении деталей продажи!"}

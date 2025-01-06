@@ -36,7 +36,7 @@ async def update_product_by_id(id: int, new_product: SProductUpd = Depends(), us
     
 @router.put("/update_by_filter/")
 async def update_product_by_filter(new_product: SProductUpd = Depends(), user_data: User = Depends(is_current_user_admin)) -> dict:
-    check = await ProductDAO.update(filter_by=new_product.to_filter_dict(), **new_product.to_new_data_dict)
+    check = await ProductDAO.update(filter_by=new_product.to_filter_dict(), **new_product.to_new_data_dict())
     if check:
         return {"message": f"Продукты успешно обновлены!", "rows_updated": check, "data": new_product.to_new_data_dict()}
     else:
