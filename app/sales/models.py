@@ -14,11 +14,11 @@ class Sale(Base):
     customer_id: Mapped[int] = mapped_column(ForeignKey('customers.id'), nullable=True)
     sale_date: Mapped[date]
 
-    saledetails: Mapped[list["SaleDetails"]] = relationship(
+    saledetails: Mapped[list["SaleDetails"]] = relationship(  # noqa: F821
         "SaleDetails",
         back_populates="sale"
     )
-    customer: Mapped["Customer"] = relationship(
+    customer: Mapped["Customer"] = relationship(  # noqa: F821
         "Customer",
         back_populates="sales"
     )

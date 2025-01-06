@@ -14,7 +14,7 @@ async def test_get_all_sales_no_auth():
 
 
 @pytest.mark.asyncio
-async def test_get_sale_by_id_no_auth():
+async def test_get_sale_by_id_no_auth(setup_database):
     test_sale_id = 1
     async with AsyncClient(base_url="http://127.0.0.1:8000") as async_client:
         response = await async_client.get(f"/sales/{test_sale_id}")
@@ -36,7 +36,7 @@ async def test_add_sale_no_auth():
 
 
 @pytest.mark.asyncio
-async def test_upd_sale_by_id_no_auth():
+async def test_upd_sale_by_id_no_auth(setup_database):
     updated_sale = {
         'branch': "Updated branch",
         'city': "Updated city",
@@ -65,7 +65,7 @@ async def test_upd_sale_by_filter_no_auth():
 
 
 @pytest.mark.asyncio
-async def test_delete_sale_by_id_no_auth():
+async def test_delete_sale_by_id_no_auth(setup_database):
     sale_id = 1
     async with AsyncClient(base_url="http://127.0.0.1:8000") as async_client:
         response = await async_client.delete(f"/sales/delete/{sale_id}")
@@ -81,18 +81,6 @@ async def test_get_all_sales(fake_super_token):
         response = await async_client.get("/sales/")
     assert response.status_code == 200
     assert isinstance(response.json(), list)
-
-
-@pytest.mark.asyncio
-async def test_get_sale_by_id(fake_super_token):
-    test_sale_id = 1
-    async with AsyncClient(
-        base_url="http://127.0.0.1:8000",
-        cookies={"users_access_token": fake_super_token}
-    ) as async_client:
-        response = await async_client.get(f"/sales/{test_sale_id}")
-    assert response.status_code == 200
-    assert response.json()["id"] == test_sale_id
 
 
 @pytest.mark.asyncio
@@ -114,7 +102,19 @@ async def test_add_sale(fake_super_token):
 
 
 @pytest.mark.asyncio
-async def test_upd_sale_by_id(fake_super_token):
+async def test_get_sale_by_id(fake_super_token, setup_database):
+    test_sale_id = 1
+    async with AsyncClient(
+        base_url="http://127.0.0.1:8000",
+        cookies={"users_access_token": fake_super_token}
+    ) as async_client:
+        response = await async_client.get(f"/sales/{test_sale_id}")
+    assert response.status_code == 200
+    assert response.json()["id"] == test_sale_id
+
+
+@pytest.mark.asyncio
+async def test_upd_sale_by_id(fake_super_token, setup_database):
     updated_sale = {
         'branch': "Updated branch",
         'city': "Updated city",
@@ -151,7 +151,7 @@ async def test_upd_sale_by_filter(fake_super_token):
 
 
 @pytest.mark.asyncio
-async def test_delete_sale_by_id(fake_super_token):
+async def test_delete_sale_by_id(fake_super_token, setup_database):
     sale_id = 1
     async with AsyncClient(
         base_url="http://127.0.0.1:8000",

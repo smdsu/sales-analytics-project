@@ -14,7 +14,7 @@ async def test_get_all_customers_no_auth():
 
 
 @pytest.mark.asyncio
-async def test_get_customer_by_id_no_auth():
+async def test_get_customer_by_id_no_auth(setup_database):
     test_customer_id = 1
     async with AsyncClient(base_url="http://127.0.0.1:8000") as async_client:
         response = await async_client.get(f"/customers/{test_customer_id}")
@@ -39,7 +39,7 @@ async def test_add_customer_no_auth():
 
 
 @pytest.mark.asyncio
-async def test_upd_customer_by_id_no_auth():
+async def test_upd_customer_by_id_no_auth(setup_database):
     updated_customer = {
         "name": "Updated Customer",
         "email": "updated@example.com",
@@ -74,7 +74,7 @@ async def test_upd_customer_by_filter_no_auth():
 
 
 @pytest.mark.asyncio
-async def test_delete_customer_by_id_no_auth():
+async def test_delete_customer_by_id_no_auth(setup_database):
     customer_id = 1
     async with AsyncClient(base_url="http://127.0.0.1:8000") as async_client:
         response = await async_client.delete(f"/customers/delete/{customer_id}")
@@ -90,18 +90,6 @@ async def test_get_all_customers(fake_super_token):
         response = await async_client.get("/customers/")
     assert response.status_code == 200
     assert isinstance(response.json(), list)
-
-
-@pytest.mark.asyncio
-async def test_get_customer_by_id(fake_super_token):
-    test_customer_id = 1
-    async with AsyncClient(
-        base_url="http://127.0.0.1:8000",
-        cookies={"users_access_token": fake_super_token}
-    ) as async_client:
-        response = await async_client.get(f"/customers/{test_customer_id}")
-    assert response.status_code == 200
-    assert response.json()["id"] == test_customer_id
 
 
 @pytest.mark.asyncio
@@ -126,7 +114,19 @@ async def test_add_customer(fake_super_token):
 
 
 @pytest.mark.asyncio
-async def test_upd_customer_by_id(fake_super_token):
+async def test_get_customer_by_id(fake_super_token, setup_database):
+    test_customer_id = 1
+    async with AsyncClient(
+        base_url="http://127.0.0.1:8000",
+        cookies={"users_access_token": fake_super_token}
+    ) as async_client:
+        response = await async_client.get(f"/customers/{test_customer_id}")
+    assert response.status_code == 200
+    assert response.json()["id"] == test_customer_id
+
+
+@pytest.mark.asyncio
+async def test_upd_customer_by_id(fake_super_token, setup_database):
     updated_customer = {
         "name": "Updated Customer",
         "email": "updated@example.com",
@@ -151,7 +151,7 @@ async def test_upd_customer_by_filter(fake_super_token):
         "phone_new": "9876543210"
     }
     filter_data = {
-        "email": "test@example.com"
+        "email": "updated@example.com"
     }
     async with AsyncClient(
         base_url="http://127.0.0.1:8000",
@@ -169,7 +169,7 @@ async def test_upd_customer_by_filter(fake_super_token):
 
 
 @pytest.mark.asyncio
-async def test_delete_customer_by_id(fake_super_token):
+async def test_delete_customer_by_id(fake_super_token, setup_database):
     customer_id = 1
     async with AsyncClient(
         base_url="http://127.0.0.1:8000",

@@ -11,7 +11,7 @@ async def test_get_all_salesdetails_no_auth():
 
 
 @pytest.mark.asyncio
-async def test_get_full_saledetail_by_sale_id_no_auth():
+async def test_get_full_saledetail_by_sale_id_no_auth(setup_database):
     test_sale_id = 1
     async with AsyncClient(base_url="http://127.0.0.1:8000") as async_client:
         response = await async_client.get(f"/saledetails/full_bill/{test_sale_id}")
@@ -43,7 +43,7 @@ async def test_upd_saledetail_no_auth():
 
 
 @pytest.mark.asyncio
-async def test_delete_saledetail_no_auth():
+async def test_delete_saledetail_no_auth(setup_database):
     sale_id = 1
     async with AsyncClient(base_url="http://127.0.0.1:8000") as async_client:
         response = await async_client.delete(f"/saledetails/delete/{sale_id}")
@@ -57,18 +57,6 @@ async def test_get_all_salesdetails(fake_super_token):
         cookies={"users_access_token": fake_super_token}
     ) as async_client:
         response = await async_client.get("/saledetails/")
-    assert response.status_code == 200
-    assert isinstance(response.json(), list)
-
-
-@pytest.mark.asyncio
-async def test_get_full_saledetail_by_sale_id(fake_super_token):
-    test_sale_id = 1
-    async with AsyncClient(
-        base_url="http://127.0.0.1:8000",
-        cookies={"users_access_token": fake_super_token}
-    ) as async_client:
-        response = await async_client.get(f"/saledetails/full_bill/{test_sale_id}")
     assert response.status_code == 200
     assert isinstance(response.json(), list)
 
@@ -90,6 +78,18 @@ async def test_add_saledetail(fake_super_token):
 
 
 @pytest.mark.asyncio
+async def test_get_full_saledetail_by_sale_id(fake_super_token, setup_database):
+    test_sale_id = 1
+    async with AsyncClient(
+        base_url="http://127.0.0.1:8000",
+        cookies={"users_access_token": fake_super_token}
+    ) as async_client:
+        response = await async_client.get(f"/saledetails/full_bill/{test_sale_id}")
+    assert response.status_code == 200
+    assert isinstance(response.json(), list)
+
+
+@pytest.mark.asyncio
 async def test_upd_saledetail(fake_super_token):
     updated_sale = {
         "sale_id": 1,
@@ -106,8 +106,8 @@ async def test_upd_saledetail(fake_super_token):
 
 
 @pytest.mark.asyncio
-async def test_delete_saledetail(fake_super_token):
-    sale_id = 2
+async def test_delete_saledetail(fake_super_token, setup_database):
+    sale_id = 1
     async with AsyncClient(
         base_url="http://127.0.0.1:8000",
         cookies={"users_access_token": fake_super_token}

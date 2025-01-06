@@ -62,16 +62,15 @@ async def get_all_users(user_data: User = Depends(is_current_user_admin)):
 async def get_me(user_data: User = Depends(get_current_user)):
     return user_data
 
+
 # Костыль для суперадмина
-'''
 @router_users.put("/set_me_founder")
 async def set_me_founder(user_data: User = Depends(get_current_user)):
     check = await UsersDAO.update(filter_by={'id': user_data.id}, is_super_admin=True)
     if check:
-        return {"message": f"Пользователь {id} успешно обновлен!"}
+        return {"message": f"Пользователь {user_data.id} успешно обновлен!"}
     else:
         return {"message": "Ошибка при обновлении покупателя!"}
-'''
 
 
 @router_users.get(

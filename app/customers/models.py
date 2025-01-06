@@ -13,7 +13,10 @@ class Customer(Base):
     phone_number: Mapped[str_uniq]
     gender: Mapped[str]
 
-    sales: Mapped[list["Sale"]] = relationship("Sale", back_populates="customer")
+    sales: Mapped[list["Sale"]] = relationship(  # noqa: F821
+        "Sale",
+        back_populates="customer"
+    )
 
     def __repr__(self):
         return f"{self.__class__.__name__}(id={self.id})"

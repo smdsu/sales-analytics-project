@@ -10,7 +10,7 @@ class Product(Base):
     product_category: Mapped[str]
     unit_price: Mapped[float]
 
-    saledetails: Mapped[list["SaleDetails"]] = relationship(
+    saledetails: Mapped[list["SaleDetails"]] = relationship(  # noqa: F821
         "SaleDetails",
         back_populates="product"
     )

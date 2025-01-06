@@ -11,6 +11,20 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_USER: adminsale
+          POSTGRES_PASSWORD: root
+          POSTGRES_DB: sales_db
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd="pg_isready -U adminsale"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -23,7 +37,36 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Wait for PostgreSQL to be ready
+        run: |
+          until pg_isready -h localhost -p 5433; do
+            echo "Waiting for PostgreSQL to be ready..."
+            sleep 5
+          done
+
+      - name: Run Alembic migrations
+        run: |
+          alembic upgrade head
+
+      - name: Start FastAPI app in the background
+        run: |
+          nohup uvicorn app.main:app &
+          sleep 5  # Подождите немного, чтобы сервер успел запуститься
+      
+      - name: Check if FastAPI server is up
+        run: |
+          until curl -s http://127.0.0.1:8000/; do
+            echo "Waiting for FastAPI server to be ready..."
+            sleep 5
+          done
+        
       - name: Run tests with coverage
+        env:
+          DB_HOST: localhost
+          DB_PORT: 5433
+          DB_NAME: sales_db
+          DB_USER: adminsale
+          DB_PASSWORD: root
         run: pytest --cov=app tests/
 
       - name: Run linter
