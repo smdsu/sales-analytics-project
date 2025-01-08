@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from app.sales.dao import SaleDAO
-from app.sales.schemas import SSale, SSaleAdd, SSaleUpd
-from app.sales.rb import RBSale
+from app.sales.schemas import SSale, SSaleAdd, SSaleUpd, SSaleTotal
+from app.sales.rb import RBSale, RBSaleTime, RBSaleWithTotal
 from app.users.dependencies import (
     is_current_user_admin,
     is_current_user_analyst,
@@ -25,6 +25,36 @@ async def get_all_sales(
 
 
 @router.get(
+    "/with_total",
+    response_model=list[SSaleTotal],
+    summary="Получить список всех продаж с общими суммами"
+)
+async def get_all_sales_with_total(
+    request_body: RBSaleWithTotal = Depends(),
+    user_data: User = Depends(is_current_user_analyst)
+) -> list[SSaleTotal]:
+    sales = await SaleDAO.find_all_with_total(**request_body.to_dict())
+    if not sales:
+        raise HTTPException(status_code=404, detail="Продажи не найдены")
+    return sales
+
+
+@router.get(
+    "/{id}/with_total/",
+    response_model=SSaleTotal,
+    summary="Получить данные продажи по ID с общим чеком"
+)
+async def get_sale_by_id_with_total(
+    id: int,
+    user_data: User = Depends(is_current_user_analyst)
+) -> SSaleTotal | None:
+    rez = await SaleDAO.find_one_or_none_with_total(id)
+    if not rez:
+        raise HTTPException(status_code=404, detail=f'Продажа с id={id} не найдена')
+    return rez
+
+
+@router.get(
     "/{id}",
     response_model=SSale,
     summary="Получить данные продажи по ID"
@@ -37,6 +67,22 @@ async def get_sale_by_id(
     if not rez:
         raise HTTPException(status_code=404, detail=f'Продукт с id={id} не найден')
     return rez
+
+
+@router.get(
+    "/time_range/{param}",
+    response_model=list[SSale],
+    summary=(
+        "Получить продажи в заданном временном диапазоне."
+        "Доступные параметры: sale_date, created_at, updated_at"
+    )
+)
+async def get_sales_by_time_range(
+    param: str,
+    user_data: User = Depends(is_current_user_analyst),
+    request_body: RBSaleTime = Depends()
+) -> list[SSale]:
+    return await SaleDAO.find_all_in_time_range(**request_body.to_dict(), param=param)
 
 
 @router.post("/add/")

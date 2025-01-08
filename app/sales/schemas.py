@@ -15,6 +15,19 @@ class SSale(BaseModel):
     updated_at: datetime = Field(..., description="Время обноввления записи в таблице")
 
 
+class SSaleTotal(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    sale_id: int
+    branch: str = Field(..., description="Название филиала")
+    city: str = Field(..., description="Город")
+    customer_type: str = Field(..., description="Тип клиента")
+    customer_id: float = Field(..., description="ID клиента")
+    sale_date: date = Field(..., description="Дата продажи")
+    total_amount: float = Field(..., description="Сумма продажи")
+    created_at: datetime = Field(..., description="Время создания записи в таблице")
+    updated_at: datetime = Field(..., description="Время обноввления записи в таблице")
+
+
 class SSaleAdd(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     branch: str = Field(..., description="Название филиала")

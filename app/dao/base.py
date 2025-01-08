@@ -4,6 +4,8 @@ from sqlalchemy.future import select
 from sqlalchemy import update as sqlalchemy_update, delete as sqlalchemy_delete
 from sqlalchemy.exc import SQLAlchemyError
 
+from datetime import datetime
+
 
 class BaseDAO:
     model = None
@@ -74,3 +76,22 @@ class BaseDAO:
                     await session.rollback()
                     raise e
                 return result.rowcount
+
+    @classmethod
+    async def find_all_in_time_range(
+        cls,
+        start_time: datetime = None,
+        end_time: datetime = None,
+        param: str = "created_at",
+        **filter_by
+    ):
+        async with async_session_maker() as session:
+            query = select(cls.model).filter_by(**filter_by)
+
+            if start_time:
+                query = query.where(getattr(cls.model, param) >= start_time)
+            if end_time:
+                query = query.where(getattr(cls.model, param) <= end_time)
+
+            result = await session.execute(query)
+            return result.scalars().all()

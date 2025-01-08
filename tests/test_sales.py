@@ -14,6 +14,44 @@ async def test_get_all_sales_no_auth():
 
 
 @pytest.mark.asyncio
+async def test_get_all_sales_with_total_no_auth():
+    async with AsyncClient(base_url="http://127.0.0.1:8000") as async_client:
+        response = await async_client.get("/sales/with_total")
+    assert response.status_code == 307
+
+
+@pytest.mark.asyncio
+async def test_get_all_sales_with_total_by_id_no_auth():
+    test_sale_id = 1
+    async with AsyncClient(base_url="http://127.0.0.1:8000") as async_client:
+        response = await async_client.get(f"/sales/{test_sale_id}/with_total/")
+    assert response.status_code == 307
+
+
+@pytest.mark.asyncio
+async def test_get_all_in_time_range_no_auth():
+    params = [None, "sale_date", "created_at", "updated_at"]
+    start_time_range = [None, "2025-01-01", "2025-01-05", "2023-01-08"]
+    end_time_range = [None, "2025-01-03", "2025-01-05", "2023-01-01"]
+    async with AsyncClient(base_url="http://127.0.0.1:8000") as async_client:
+        for param in params:
+            for i in range(len(start_time_range)):
+                response = await async_client.get(
+                    f"/sales/time_range/{param}",
+                    params={
+                        "start_time": start_time_range[i],
+                        "end_time": end_time_range[i]
+                    }
+                )
+                print(
+                    "param:", param,
+                    "start_time:", start_time_range[i],
+                    "end_time:", end_time_range[i]
+                )
+                assert response.status_code == 307
+
+
+@pytest.mark.asyncio
 async def test_get_sale_by_id_no_auth(setup_database):
     test_sale_id = 1
     async with AsyncClient(base_url="http://127.0.0.1:8000") as async_client:
@@ -111,6 +149,62 @@ async def test_get_sale_by_id(fake_super_token, setup_database):
         response = await async_client.get(f"/sales/{test_sale_id}")
     assert response.status_code == 200
     assert response.json()["id"] == test_sale_id
+
+
+@pytest.mark.asyncio
+async def test_get_all_sales_with_total(fake_super_token, setup_database):
+    async with AsyncClient(
+        base_url="http://127.0.0.1:8000",
+        cookies={"users_access_token": fake_super_token}
+    ) as async_client:
+        response = await async_client.get("/sales/with_total")
+    assert response.status_code == 200
+    assert isinstance(response.json(), list)
+
+
+@pytest.mark.asyncio
+async def test_get_all_sales_with_total_by_id(fake_super_token, setup_database):
+    async with AsyncClient(
+        base_url="http://127.0.0.1:8000",
+        cookies={"users_access_token": fake_super_token}
+    ) as async_client:
+
+        response = await async_client.get("/sales/")
+        assert response.status_code == 200
+        sales = response.json()
+
+        max_sale_id = max(sale['id'] for sale in sales)
+
+        response = await async_client.get(f"/sales/{max_sale_id}/with_total/")
+    assert response.status_code == 200
+    assert response.json()["sale_id"] == max_sale_id
+
+
+@pytest.mark.asyncio
+async def test_get_all_in_time_range(fake_super_token, setup_database):
+    params = ["sale_date", "created_at", "updated_at"]
+    start_time_range = ["2025-01-01", "2025-01-05", "2023-01-08"]
+    end_time_range = ["2025-01-03", "2025-01-05", "2023-01-01"]
+    async with AsyncClient(
+        base_url="http://127.0.0.1:8000",
+        cookies={"users_access_token": fake_super_token}
+    ) as async_client:
+        for param in params:
+            for i in range(len(start_time_range)):
+                response = await async_client.get(
+                    f"/sales/time_range/{param}",
+                    params={
+                        "start_time": start_time_range[i],
+                        "end_time": end_time_range[i]
+                    }
+                )
+                print(
+                    "param:", param,
+                    "start_time:", start_time_range[i],
+                    "end_time:", end_time_range[i]
+                )
+                assert response.status_code == 200
+                assert isinstance(response.json(), list)
 
 
 @pytest.mark.asyncio

@@ -63,7 +63,7 @@ def generate_random_sales_and_details(num_records, customer_ids, product_ids):
         sale_date = fake.date_this_year()
 
         sales.append({
-            'sale_id': sale_id,
+            'id': sale_id,
             'branch': fake.city(),
             'city': fake.city(),
             'customer_type': random.choice(['Member', 'Normal']),
@@ -120,28 +120,29 @@ async def insert_sale_details(sale_details):
 
 async def get_customers():
     async with async_session_maker() as session:
-        result = await session.execute(text("SELECT customer_id FROM customers"))
+        result = await session.execute(text("SELECT id FROM customers"))
         return [row[0] for row in result.fetchall()]
 
 
 async def get_products():
     async with async_session_maker() as session:
-        result = await session.execute(text("SELECT product_id FROM products"))
+        result = await session.execute(text("SELECT id FROM products"))
         return [row[0] for row in result.fetchall()]
 
 
 async def main():
-    customers = generate_random_customer(1000)
+    '''
+    customers = generate_random_customer(100)
     await insert_customers(customers)
 
-    products = generate_random_product(1000)
+    products = generate_random_product(100)
     await insert_products(products)
-
+    '''
     customers = await get_customers()
     products = await get_products()
 
     sales, sale_details = generate_random_sales_and_details(
-        1000,
+        100,
         customers,
         products
     )
