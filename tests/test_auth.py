@@ -125,6 +125,29 @@ async def test_get_all_users_no_auth():
 
 
 @pytest.mark.asyncio
+async def test_get_all_in_time_range_no_auth():
+    params = ["created_at", "updated_at"]
+    start_time_range = ["2025-01-01", "2025-01-05", "2023-01-08"]
+    end_time_range = ["2025-01-03", "2025-01-05", "2023-01-01"]
+    async with AsyncClient(base_url="http://127.0.0.1:8000") as async_client:
+        for param in params:
+            for i in range(len(start_time_range)):
+                response = await async_client.get(
+                    f"/users/time_range/{param}",
+                    params={
+                        "start_time": start_time_range[i],
+                        "end_time": end_time_range[i]
+                    }
+                )
+                print(
+                    "param:", param,
+                    "start_time:", start_time_range[i],
+                    "end_time:", end_time_range[i]
+                )
+                assert response.status_code == 307
+
+
+@pytest.mark.asyncio
 async def test_get_user_by_id_no_auth(setup_database):
     test_user_id = 2
     async with AsyncClient(base_url="http://127.0.0.1:8000") as async_client:
@@ -262,6 +285,33 @@ async def test_upd_user_by_id(fake_super_token, setup_database):
         assert response.json()["message"] == (
             f"Пользователь {max_user_id} успешно обновлен!"
         )
+
+
+@pytest.mark.asyncio
+async def test_get_all_in_time_range(fake_super_token, setup_database):
+    params = ["created_at", "updated_at"]
+    start_time_range = ["2025-01-01", "2025-01-05", "2023-01-08"]
+    end_time_range = ["2025-01-03", "2025-01-05", "2023-01-01"]
+    async with AsyncClient(
+        base_url="http://127.0.0.1:8000",
+        cookies={"users_access_token": fake_super_token}
+    ) as async_client:
+        for param in params:
+            for i in range(len(start_time_range)):
+                response = await async_client.get(
+                    f"/users/time_range/{param}",
+                    params={
+                        "start_time": start_time_range[i],
+                        "end_time": end_time_range[i]
+                    }
+                )
+                print(
+                    "param:", param,
+                    "start_time:", start_time_range[i],
+                    "end_time:", end_time_range[i]
+                )
+                assert response.status_code == 200
+                assert isinstance(response.json(), list)
 
 
 @pytest.mark.asyncio

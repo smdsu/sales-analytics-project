@@ -1,3 +1,4 @@
+from datetime import datetime
 from pydantic import Field, EmailStr, BaseModel
 from typing import Optional
 from pydantic import ConfigDict
@@ -35,6 +36,15 @@ class SUserData(BaseModel):
     phone_number: str = Field(..., description="Номер телефона, начинающийся с +")
     email: EmailStr = Field(..., description="Электронная почта")
 
+
+class SUserFullData(BaseModel):
+    id: int = Field(..., description="ID пользователя")
+    first_name: str = Field(..., description="Имя")
+    last_name: str = Field(..., description="Фамилия")
+
+    phone_number: str = Field(..., description="Номер телефона, начинающийся с +")
+    email: EmailStr = Field(..., description="Электронная почта")
+
     password: str = Field(..., description="Хэш пароля")
 
     is_user: bool
@@ -42,6 +52,9 @@ class SUserData(BaseModel):
     is_analyst: bool
     is_admin: bool
     is_super_admin: bool
+
+    created_at: datetime
+    updated_at: datetime
 
 
 class SUserUpd(BaseModel):
