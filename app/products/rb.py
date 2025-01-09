@@ -61,4 +61,3 @@ class RBProductTime:
             if value is not None
         }
         return filttered_date
-
