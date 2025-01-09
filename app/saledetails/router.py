@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from app.saledetails.dao import SaleDetailsDAO
-from app.saledetails.rb import RBSaleDetail
+from app.saledetails.rb import RBSaleDetail, RBSaleDetailTime
 from app.saledetails.schemas import (
     SSaleDetail,
     SSaleDetailFull,
@@ -46,6 +46,44 @@ async def get_full_by_sale_id(
             detail=f'Детали по продаже с id={sale_id} не найдены'
         )
     return result
+
+
+@router.get(
+    "/time_range/{param}",
+    response_model=list[SSaleDetail],
+    summary=(
+        "Получить детали продаж в заданном временном диапазоне."
+        "Доступные параметры: created_at, updated_at"
+    )
+)
+async def get_saledetails_by_time_range(
+    param: str,
+    user_data: User = Depends(is_current_user_analyst),
+    request_body: RBSaleDetailTime = Depends()
+) -> list[SSaleDetail]:
+    return await SaleDetailsDAO.find_all_in_time_range(
+        **request_body.to_dict(),
+        param=param
+    )
+
+
+@router.get(
+    "/full_bill/time_range/{param}",
+    response_model=list[SSaleDetailFull],
+    summary=(
+        "Получить детали продаж в заданном временном диапазоне."
+        "Доступные параметры: created_at, updated_at"
+    )
+)
+async def get_full_saledetails_by_time_range(
+    param: str,
+    user_data: User = Depends(is_current_user_analyst),
+    request_body: RBSaleDetailTime = Depends()
+) -> list[SSaleDetailFull]:
+    return await SaleDetailsDAO.find_all_in_time_range(
+        **request_body.to_dict(),
+        param=param
+    )
 
 
 @router.post("/add/")

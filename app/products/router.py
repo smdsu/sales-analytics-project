@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from app.products.dao import ProductDAO
 from app.products.schemas import SProduct, SProductAdd, SProductUpd
-from app.products.rb import RBProduct
+from app.products.rb import RBProduct, RBProductTime
 from app.users.dependencies import is_current_user_admin, is_current_user_analyst
 from app.users.models import User
 
@@ -33,6 +33,25 @@ async def get_product_by_id(
     if not rez:
         raise HTTPException(status_code=404, detail=f'Продукт с id={id} не найден')
     return rez
+
+
+@router.get(
+    "/time_range/{param}",
+    response_model=list[SProduct],
+    summary=(
+        "Получить детали продаж в заданном временном диапазоне."
+        "Доступные параметры: created_at, updated_at"
+    )
+)
+async def get_products_by_time_range(
+    param: str,
+    user_data: User = Depends(is_current_user_analyst),
+    request_body: RBProductTime = Depends()
+) -> list[SProduct]:
+    return await ProductDAO.find_all_in_time_range(
+        **request_body.to_dict(),
+        param=param
+    )
 
 
 @router.post("/add/")

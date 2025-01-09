@@ -7,7 +7,14 @@ from app.users.auth import (
     get_current_user,
     )
 from app.users.dao import UsersDAO
-from app.users.schemas import SUserRegister, SUserAuth, SUserData, SUserUpd
+from app.users.schemas import (
+    SUserRegister,
+    SUserAuth,
+    SUserData,
+    SUserUpd,
+    SUserFullData,
+)
+from app.users.rb import RBUserTime
 from app.users.models import User
 from app.users.dependencies import is_current_user_admin, is_current_user_superadmin
 
@@ -53,7 +60,7 @@ async def logout_user(response: Response):
     return {'message': 'Пользователь успешно вышел из системы'}
 
 
-@router_users.get("/", response_model=list[SUserData])
+@router_users.get("/", response_model=list[SUserFullData])
 async def get_all_users(user_data: User = Depends(is_current_user_admin)):
     return await UsersDAO.find_all()
 
@@ -75,7 +82,7 @@ async def set_me_founder(user_data: User = Depends(get_current_user)):
 
 @router_users.get(
     "/{id}",
-    response_model=SUserData,
+    response_model=SUserFullData,
     summary="Получить данные пользователя по ID"
 )
 async def get_user_by_id(
@@ -89,6 +96,22 @@ async def get_user_by_id(
             detail=f'Пользователь с id={id} не найден'
         )
     return rez
+
+
+@router_users.get(
+    "/time_range/{param}",
+    response_model=list[SUserFullData],
+    summary=(
+        "Получить пользователей в заданном временном диапазоне."
+        "Доступные параметры: created_at, updated_at"
+    )
+)
+async def get_users_by_time_range(
+    param: str,
+    user_data: User = Depends(is_current_user_admin),
+    request_body: RBUserTime = Depends()
+) -> list[SUserData]:
+    return await UsersDAO.find_all_in_time_range(**request_body.to_dict(), param=param)
 
 
 @router_users.post("/add/")

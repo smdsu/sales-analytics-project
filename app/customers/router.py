@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from app.customers.dao import CustomerDAO
 from app.customers.schemas import SCustomer, SCustomerAdd, SCustomerUpd
-from app.customers.rb import RBCustomer
+from app.customers.rb import RBCustomer, RBCustomerTime
 from app.users.dependencies import (
     is_current_user_admin,
     is_current_user_vendor,
@@ -40,6 +40,25 @@ async def get_customer_by_id(
     if not rez:
         raise HTTPException(status_code=404, detail=f'Клиент с id={id} не найден')
     return rez
+
+
+@router.get(
+    "/time_range/{param}",
+    response_model=list[SCustomer],
+    summary=(
+        "Получить детали продаж в заданном временном диапазоне."
+        "Доступные параметры: date_of_birth, created_at, updated_at"
+    )
+)
+async def get_customers_by_time_range(
+    param: str,
+    user_data: User = Depends(is_current_user_analyst),
+    request_body: RBCustomerTime = Depends()
+) -> list[SCustomer]:
+    return await CustomerDAO.find_all_in_time_range(
+        **request_body.to_dict(),
+        param=param
+    )
 
 
 @router.post("/add/")
