@@ -1,4 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import (
+    APIRouter,
+    Depends,
+    HTTPException,
+    UploadFile,
+    File,
+)
 from app.sales.dao import SaleDAO
 from app.sales.schemas import SSale, SSaleAdd, SSaleUpd, SSaleTotal
 from app.sales.rb import RBSale, RBSaleTime, RBSaleWithTotal
@@ -8,6 +14,7 @@ from app.users.dependencies import (
     is_current_user_vendor,
 )
 from app.users.models import User
+from app.bulk.bulk import get_bulk_dict
 
 router = APIRouter(prefix="/sales", tags=["Работа с продажами"])
 
@@ -142,3 +149,17 @@ async def delete_sale_by_id(
         return {"message": f"Продажа с {id} удалён!"}
     else:
         return {"message": "Произошла ошибка при удалении продажи!"}
+
+
+@router.post("/bulk_insert/")
+async def bulk_insert_sales(
+    user_data: User = Depends(is_current_user_admin),
+    file: UploadFile = File(...)
+):
+    valid_records = await get_bulk_dict(file, SSaleAdd)
+
+    check = await SaleDAO.bulk_insert(valid_records)
+    if check:
+        return {"message": "Продажи успешно добавлены!"}
+    else:
+        return {"message": "Ошибка при добавлении продаж!"}

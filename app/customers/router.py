@@ -1,4 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import (
+    APIRouter,
+    Depends,
+    HTTPException,
+    UploadFile,
+    File,
+)
+from app.bulk.bulk import get_bulk_dict
+
 from app.customers.dao import CustomerDAO
 from app.customers.schemas import SCustomer, SCustomerAdd, SCustomerUpd
 from app.customers.rb import RBCustomer, RBCustomerTime
@@ -121,3 +129,17 @@ async def delete_customer_by_id(
         return {"message": f"Покупатель с {id} удалён!"}
     else:
         return {"message": "Произошла ошибка при удалении покупателя!"}
+
+
+@router.post("/bulk_insert/")
+async def bulk_insert_products(
+    user_data: User = Depends(is_current_user_admin),
+    file: UploadFile = File(...)
+):
+    valid_records = await get_bulk_dict(file, SCustomerAdd)
+
+    check = await CustomerDAO.bulk_insert(valid_records)
+    if check:
+        return {"message": "Покупатели успешно добавлены!"}
+    else:
+        return {"message": "Ошибка при добавлении покупателей!"}

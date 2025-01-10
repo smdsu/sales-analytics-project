@@ -97,6 +97,15 @@ async def test_delete_saledetail_no_auth(setup_database):
 
 
 @pytest.mark.asyncio
+async def test_bulk_insert_no_auth():
+    test_data = b"sale_id,product_id,quantity\n2,96,1\n2,97,11\n"
+    file = {"file": ("test.csv", test_data, "text/csv")}
+    async with AsyncClient(base_url="http://127.0.0.1:8000") as async_client:
+        response = await async_client.post("/saledetails/bulk_insert/", files=file)
+    assert response.status_code == 307
+
+
+@pytest.mark.asyncio
 async def test_get_all_salesdetails(fake_super_token):
     async with AsyncClient(
         base_url="http://127.0.0.1:8000",
@@ -215,3 +224,16 @@ async def test_delete_saledetail(fake_super_token, setup_database):
         response = await async_client.delete(f"/saledetails/delete/{sale_id}")
     assert response.status_code == 200
     assert response.json()["message"] == f"Детали продажи с {sale_id} удалены!"
+
+
+@pytest.mark.asyncio
+async def test_bulk_insert(fake_super_token, setup_database):
+    test_data = b"sale_id,product_id,quantity\n1,1,1\n"
+    file = {"file": ("test.csv", test_data, "text/csv")}
+    async with AsyncClient(
+        base_url="http://127.0.0.1:8000",
+        cookies={"users_access_token": fake_super_token}
+    ) as async_client:
+        response = await async_client.post("/saledetails/bulk_insert/", files=file)
+    assert response.status_code == 200
+    assert response.json()["message"] == "Детали продажи успешно добавлены!"

@@ -1,4 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import (
+    APIRouter,
+    Depends,
+    HTTPException,
+    UploadFile,
+    File,
+)
+
+from app.bulk.bulk import get_bulk_dict
 from app.products.dao import ProductDAO
 from app.products.schemas import SProduct, SProductAdd, SProductUpd
 from app.products.rb import RBProduct, RBProductTime
@@ -114,3 +122,17 @@ async def delete_product_by_id(
         return {"message": f"Продукт с {id} удалён!"}
     else:
         return {"message": "Произошла ошибка при удалении продукта!"}
+
+
+@router.post("/bulk_insert/")
+async def bulk_insert_products(
+    user_data: User = Depends(is_current_user_admin),
+    file: UploadFile = File(...)
+):
+    valid_records = await get_bulk_dict(file, SProductAdd)
+
+    check = await ProductDAO.bulk_insert(valid_records)
+    if check:
+        return {"message": "Продукты успешно добавлены!"}
+    else:
+        return {"message": "Ошибка при добавлении продуктов!"}
