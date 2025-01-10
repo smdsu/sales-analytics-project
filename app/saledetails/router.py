@@ -1,4 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import (
+    APIRouter,
+    Depends,
+    HTTPException,
+    UploadFile,
+    File,
+)
 from app.saledetails.dao import SaleDetailsDAO
 from app.saledetails.rb import RBSaleDetail, RBSaleDetailTime
 from app.saledetails.schemas import (
@@ -13,6 +19,7 @@ from app.users.dependencies import (
     is_current_user_vendor,
 )
 from app.users.models import User
+from app.bulk.bulk import get_bulk_dict
 
 router = APIRouter(prefix="/saledetails", tags=["Работа с SaleDetails"])
 
@@ -130,3 +137,17 @@ async def delete_saledetail_by_id(
         return {"message": f"Детали продажи с {id} удалены!"}
     else:
         return {"message": "Произошла ошибка при удалении деталей продажи!"}
+
+
+@router.post("/bulk_insert/")
+async def bulk_insert_saledetails(
+    user_data: User = Depends(is_current_user_admin),
+    file: UploadFile = File(...)
+):
+    valid_records = await get_bulk_dict(file, SSaleDetailAdd)
+
+    check = await SaleDetailsDAO.bulk_insert(valid_records)
+    if check:
+        return {"message": "Детали продажи успешно добавлены!"}
+    else:
+        return {"message": "Ошибка при добавлении деталей продажи!"}

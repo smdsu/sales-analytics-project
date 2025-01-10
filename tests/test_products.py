@@ -59,6 +59,19 @@ async def test_add_product_no_auth():
 
 
 @pytest.mark.asyncio
+async def test_bulk_insert_no_auth():
+    test_data = (
+        b"product_name,product_description,product_category,unit_price\n"
+        b"Product A,Desc A,Category X,99.99\n"
+        b"Product B,Desc B,Category Y,49.50\n"
+    )
+    file = {"file": ("test.csv", test_data, "text/csv")}
+    async with AsyncClient(base_url="http://127.0.0.1:8000") as async_client:
+        response = await async_client.post("/products/bulk_insert/", files=file)
+    assert response.status_code == 307
+
+
+@pytest.mark.asyncio
 async def test_upd_product_by_id_no_auth(setup_database):
     updated_product = {
         "product_name": "Updated Product",
@@ -221,3 +234,20 @@ async def test_delete_product_by_id(fake_super_token, setup_database):
         print("test_delete_product_by_id: Response status code:", response.status_code)
         assert response.status_code == 200
         assert response.json()["message"] == f"Продукт с {max_product_id} удалён!"
+
+
+@pytest.mark.asyncio
+async def test_bulk_insert(fake_super_token):
+    test_data = (
+        b"product_name,product_description,product_category,unit_price\n"
+        b"Product A,Desc A,Category X,99.99\n"
+        b"Product B,Desc B,Category Y,49.50\n"
+    )
+    file = {"file": ("test.csv", test_data, "text/csv")}
+    async with AsyncClient(
+        base_url="http://127.0.0.1:8000",
+        cookies={"users_access_token": fake_super_token}
+    ) as async_client:
+        response = await async_client.post("/products/bulk_insert/", files=file)
+    assert response.status_code == 200
+    assert response.json()["message"] == "Продукты успешно добавлены!"

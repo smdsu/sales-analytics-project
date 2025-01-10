@@ -1,5 +1,5 @@
 from app.database import async_session_maker
-
+from sqlalchemy import insert
 from sqlalchemy.future import select
 from sqlalchemy import update as sqlalchemy_update, delete as sqlalchemy_delete
 from sqlalchemy.exc import SQLAlchemyError
@@ -95,3 +95,16 @@ class BaseDAO:
 
             result = await session.execute(query)
             return result.scalars().all()
+
+    @classmethod
+    async def bulk_insert(cls, data: list[dict]):
+        async with async_session_maker() as session:
+            async with session.begin():
+                query = insert(cls.model).values(data)
+                result = await session.execute(query)
+                try:
+                    await session.commit()
+                except SQLAlchemyError as e:
+                    await session.rollback()
+                    raise e
+                return result.rowcount

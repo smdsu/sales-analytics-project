@@ -14,3 +14,4 @@ sales-analytics-project.code-workspace
 /.vscode
 /tests/__pycache__
 app/models/fakedata.py
+/app/bulk/__pycache__

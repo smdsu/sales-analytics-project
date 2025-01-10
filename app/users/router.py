@@ -1,4 +1,12 @@
-from fastapi import APIRouter, HTTPException, status, Response, Depends
+from fastapi import (
+    APIRouter,
+    HTTPException,
+    status,
+    Response,
+    Depends,
+    UploadFile,
+    File,
+)
 
 from app.users.auth import (
     get_password_hash,
@@ -17,6 +25,7 @@ from app.users.schemas import (
 from app.users.rb import RBUserTime
 from app.users.models import User
 from app.users.dependencies import is_current_user_admin, is_current_user_superadmin
+from app.bulk.bulk import get_bulk_dict
 
 router_auth = APIRouter(prefix="/auth", tags=["Auth"])
 router_users = APIRouter(prefix="/users", tags=["Работа с пользователями"])
@@ -174,3 +183,17 @@ async def delete_user_by_id(
         return {"message": f"Пользователь с {id} удалён!"}
     else:
         return {"message": "Произошла ошибка при удалении пользователя!"}
+
+
+@router_users.post("/bulk_insert/")
+async def bulk_insert_users(
+    user_data: User = Depends(is_current_user_admin),
+    file: UploadFile = File(...)
+):
+    valid_records = await get_bulk_dict(file, SUserRegister)
+
+    check = await UsersDAO.bulk_insert(valid_records)
+    if check:
+        return {"message": "Пользователи успешно добавлены!"}
+    else:
+        return {"message": "Ошибка при добавлении пользователей!"}

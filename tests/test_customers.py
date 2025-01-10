@@ -62,6 +62,20 @@ async def test_add_customer_no_auth():
 
 
 @pytest.mark.asyncio
+async def test_bulk_insert_no_auth():
+    test_data = (
+        b"first_name,last_name,date_of_birth,email,phone_number,gender\n"
+        b"John,Doe,1990-01-01,johndoe@example.com,+1-234-567890,Male\n"
+        b"Jane,Smith,1985-05-15,janesmith@example.com,+0-9876-543-21,Female\n"
+    )
+
+    file = {"file": ("test.csv", test_data, "text/csv")}
+    async with AsyncClient(base_url="http://127.0.0.1:8000") as async_client:
+        response = await async_client.post("/customers/bulk_insert/", files=file)
+    assert response.status_code == 307
+
+
+@pytest.mark.asyncio
 async def test_upd_customer_by_id_no_auth(setup_database):
     updated_customer = {
         "name": "Updated Customer",
@@ -228,3 +242,20 @@ async def test_delete_customer_by_id(fake_super_token, setup_database):
         response = await async_client.delete(f"/customers/delete/{customer_id}")
     assert response.status_code == 200
     assert response.json()["message"] == f"Покупатель с {customer_id} удалён!"
+
+
+@pytest.mark.asyncio
+async def test_bulk_insert(fake_super_token):
+    test_data = (
+        b"first_name,last_name,date_of_birth,email,phone_number,gender\n"
+        b"John,Doe,1990-01-01,johndoe@example.com,+1-234-567890,Male\n"
+        b"Jane,Smith,1985-05-15,janesmith@example.com,+0-9876-543-21,Female\n"
+    )
+    file = {"file": ("test.csv", test_data, "text/csv")}
+    async with AsyncClient(
+        base_url="http://127.0.0.1:8000",
+        cookies={"users_access_token": fake_super_token}
+    ) as async_client:
+        response = await async_client.post("/customers/bulk_insert/", files=file)
+    assert response.status_code == 200
+    assert response.json()["message"] == "Покупатели успешно добавлены!"
