@@ -179,6 +179,10 @@ To maintain cache efficiency and ensure that the data remains current, we will i
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
+## About the Author
+
+This project is part of my journey to mastering backend development and API design. I'm learning as I go, so please don't judge too harshly! If you spot anything that can be improved, I'd love to hear your thoughts.
+
 ## Acknowledgments
 
 - Thanks to all the contributors who have helped to shape this project.
