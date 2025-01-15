@@ -5,6 +5,7 @@ from fastapi import (
     UploadFile,
     File,
 )
+from fastapi.responses import StreamingResponse
 from app.saledetails.dao import SaleDetailsDAO
 from app.saledetails.rb import RBSaleDetail, RBSaleDetailTime
 from app.saledetails.schemas import (
@@ -151,3 +152,33 @@ async def bulk_insert_saledetails(
         return {"message": "Детали продажи успешно добавлены!"}
     else:
         return {"message": "Ошибка при добавлении деталей продажи!"}
+
+
+@router.get("/get_csv/")
+async def get_csv(
+    request_body: RBSaleDetail = Depends(),
+    user_data: User = Depends(is_current_user_admin)
+):
+    return await SaleDetailsDAO.export_to_csv(**request_body.to_dict())
+
+
+@router.get(
+    "/download_csv/",
+    response_class=StreamingResponse,
+    responses={
+        200: {
+            "content": {"text/csv": {}},
+            "description": "Return the CSV file."
+        }
+    }
+)
+async def download_csv(
+    request_body: RBSaleDetail = Depends(),
+    user_data: User = Depends(is_current_user_admin)
+) -> StreamingResponse:
+    csv_data = await SaleDetailsDAO.export_to_csv(**request_body.to_dict())
+
+    return StreamingResponse(
+        iter([csv_data]), media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=sales_details.csv"}
+    )

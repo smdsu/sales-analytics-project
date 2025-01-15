@@ -7,7 +7,7 @@ from fastapi import (
     UploadFile,
     File,
 )
-
+from fastapi.responses import StreamingResponse
 from app.users.auth import (
     get_password_hash,
     authenticate_user,
@@ -22,7 +22,7 @@ from app.users.schemas import (
     SUserUpd,
     SUserFullData,
 )
-from app.users.rb import RBUserTime
+from app.users.rb import RBUser, RBUserTime
 from app.users.models import User
 from app.users.dependencies import is_current_user_admin, is_current_user_superadmin
 from app.bulk.bulk import get_bulk_dict
@@ -197,3 +197,33 @@ async def bulk_insert_users(
         return {"message": "Пользователи успешно добавлены!"}
     else:
         return {"message": "Ошибка при добавлении пользователей!"}
+
+
+@router_users.get("/get_csv/")
+async def get_csv(
+    request_body: RBUser = Depends(),
+    user_data: User = Depends(is_current_user_admin)
+):
+    return await UsersDAO.export_to_csv(**request_body.to_dict())
+
+
+@router_users.get(
+    "/download_csv/",
+    response_class=StreamingResponse,
+    responses={
+        200: {
+            "content": {"text/csv": {}},
+            "description": "Return the CSV file."
+        }
+    }
+)
+async def download_csv(
+    request_body: RBUser = Depends(),
+    user_data: User = Depends(is_current_user_admin)
+) -> StreamingResponse:
+    csv_data = await UsersDAO.export_to_csv(**request_body.to_dict())
+
+    return StreamingResponse(
+        iter([csv_data]), media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=users.csv"}
+    )

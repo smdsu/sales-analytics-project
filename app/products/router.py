@@ -5,7 +5,7 @@ from fastapi import (
     UploadFile,
     File,
 )
-
+from fastapi.responses import StreamingResponse
 from app.bulk.bulk import get_bulk_dict
 from app.products.dao import ProductDAO
 from app.products.schemas import SProduct, SProductAdd, SProductUpd
@@ -136,3 +136,33 @@ async def bulk_insert_products(
         return {"message": "Продукты успешно добавлены!"}
     else:
         return {"message": "Ошибка при добавлении продуктов!"}
+
+
+@router.get("/get_csv/")
+async def get_csv(
+    request_body: RBProduct = Depends(),
+    user_data: User = Depends(is_current_user_admin)
+):
+    return await ProductDAO.export_to_csv(**request_body.to_dict())
+
+
+@router.get(
+    "/download_csv/",
+    response_class=StreamingResponse,
+    responses={
+        200: {
+            "content": {"text/csv": {}},
+            "description": "Return the CSV file."
+        }
+    }
+)
+async def download_csv(
+    request_body: RBProduct = Depends(),
+    user_data: User = Depends(is_current_user_admin)
+) -> StreamingResponse:
+    csv_data = await ProductDAO.export_to_csv(**request_body.to_dict())
+
+    return StreamingResponse(
+        iter([csv_data]), media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=products.csv"}
+    )

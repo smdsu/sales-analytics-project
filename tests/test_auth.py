@@ -1,6 +1,7 @@
 import pytest
 from httpx import AsyncClient
 from faker import Faker
+from fastapi.logger import logger
 
 fake = Faker()
 
@@ -18,7 +19,6 @@ async def test_auth_register():
                 "password": "root1"
             }
         )
-        print("test_auth_register: Response status code:", response.status_code)
         assert response.status_code == 200
         assert response.json()["message"] == "Пользователь зарегестрирован"
 
@@ -378,3 +378,41 @@ async def test_bulk_insert(fake_super_token):
         response = await async_client.post("/users/bulk_insert/", files=file)
     assert response.status_code == 200
     assert response.json()["message"] == "Пользователи успешно добавлены!"
+
+
+@pytest.mark.asyncio
+async def test_get_csv(fake_super_token):
+    async with AsyncClient(
+        base_url="http://127.0.0.1:8000",
+        cookies={"users_access_token": fake_super_token}
+    ) as async_client:
+        response = await async_client.get("/users/get_csv/")
+
+    if response.status_code != 200:
+        logger.error(f"Response status code: {response.status_code}")
+        logger.error(f"Response body: {response.text}")
+
+    assert response.status_code == 200
+    assert isinstance(response.text, str)
+    assert "id" in response.text
+
+
+@pytest.mark.asyncio
+async def test_download_csv(fake_super_token):
+    async with AsyncClient(
+        base_url="http://127.0.0.1:8000",
+        cookies={"users_access_token": fake_super_token}
+    ) as async_client:
+        response = await async_client.get("/users/download_csv/")
+
+    if response.status_code != 200:
+        logger.error(f"Response status code: {response.status_code}")
+        logger.error(f"Response body: {response.text}")
+
+    assert response.status_code == 200
+    assert response.headers["Content-Type"] == "text/csv; charset=utf-8"
+    assert (
+        "attachment; filename=users.csv"
+        in response.headers["Content-Disposition"]
+    )
+    assert isinstance(response.content, bytes)
