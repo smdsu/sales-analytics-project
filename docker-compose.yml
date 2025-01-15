@@ -8,7 +8,7 @@ services:
       POSTGRES_DB: sales_db
       PGDATA: /var/lib/postgresql/data/pgdata
     ports:
-      - "5433:5432"
+      - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data/pgdata
     logging:
@@ -80,6 +80,28 @@ services:
     restart: unless-stopped
     tty: true
     stdin_open: true
+  
+
+  web:
+    build:
+      context: .
+    container_name: sales_api
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: sales_db
+      DB_USER: adminsale
+      DB_PASSWORD: root
+      SECRET_KEY: gV64m9aIzFG4qpgVphvQbPQrtAO0nM-7YwwOvu0XPt5KJOjAy4AfgLkqJXYEt
+      ALGORITHM: HS256
+      REDIS_PASSWORD: root
+      REDIS_USER: adminsale
+      REDIS_USER_PASSWORD: redisroot
 
 volumes:
   pgdata:

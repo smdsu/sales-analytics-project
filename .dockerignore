@@ -1,0 +1,17 @@
+/.venv
+/app/__pycache__
+/app/migration/__pycache__
+/app/models/__pycache__
+/app/migration/versions/__pycache__
+/app/customers/__pycache__
+/app/products/__pycache__
+/app/saledetails/__pycache__
+/app/sales/__pycache__
+sales-analytics-project.code-workspace
+/app/dao/__pycache__
+/app/users/__pycache__
+/.vscode
+/tests/__pycache__
+app/models/fakedata.py
+/app/bulk/__pycache__
+/redisdata
