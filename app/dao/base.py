@@ -225,3 +225,23 @@ class BaseDAO:
                 status_code=500,
                 detail=f"Error exporting to csv for {cls.model.__tablename__}, {str(e)}"
             ) from e
+
+    @classmethod
+    async def export_to_pdDF(cls, **filter_by):
+        try:
+            data = await cls.find_all(**filter_by)
+            df = pd.DataFrame(row.__dict__ for row in data)
+            df.drop("_sa_instance_state", axis=1, inplace=True)
+            return df
+        except Exception as e:
+            logger.error(
+                f"Error exporting to pandas DataFrame for {cls.model.__tablename__}:"
+                f"{str(e)}"
+            )
+            raise HTTPException(
+                status_code=500,
+                detail=(
+                    f"Error exporting to pandas DataFrame for {cls.model.__tablename__}"
+                    f", {str(e)}"
+                )
+            ) from e

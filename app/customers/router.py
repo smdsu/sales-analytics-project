@@ -1,3 +1,4 @@
+from io import BytesIO
 from fastapi import (
     APIRouter,
     Depends,
@@ -7,6 +8,8 @@ from fastapi import (
 )
 from fastapi.responses import StreamingResponse
 from app.bulk.bulk import get_bulk_dict
+
+from app.analytics.analytics import get_gender_distribution
 
 from app.customers.dao import CustomerDAO
 from app.customers.schemas import SCustomer, SCustomerAdd, SCustomerUpd
@@ -174,3 +177,26 @@ async def download_csv(
         iter([csv_data]), media_type="text/csv",
         headers={"Content-Disposition": "attachment; filename=customers.csv"}
     )
+
+
+@router.get(
+    "/analytics/gender_distribution",
+    response_class=StreamingResponse,
+    responses={
+        200: {
+            "content": {"image/png": {}},
+            "description": "Return the plot."
+        }
+    }
+)
+async def plot_gender_distribution(
+    user_data: User = Depends(is_current_user_analyst)
+) -> StreamingResponse:
+    df = await CustomerDAO.export_to_pdDF()
+    plot = await get_gender_distribution(df)
+
+    buffer = BytesIO()
+    plot.savefig(buffer, format="png")
+    buffer.seek(0)
+
+    return StreamingResponse(buffer, media_type="image/png")

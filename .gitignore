@@ -16,3 +16,4 @@ sales-analytics-project.code-workspace
 app/models/fakedata.py
 /app/bulk/__pycache__
 /redisdata
+/app/analytics/__pycache__
